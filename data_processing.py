@@ -102,6 +102,28 @@ class Table:
             temps.append(dict_temp)
         return temps
 
+    def pivot_table(self, keys_to_pivot_list, keys_to_aggregate_list, aggregate_func_list):
+        unique_values_list = []
+        for key_pivot in keys_to_pivot_list:
+            list1 = []
+            for value in self.select(keys_to_pivot_list):
+                if value.get(key_pivot) not in list1:
+                    list1.append(value.get(key_pivot))
+            unique_values_list.append(list1)
+        import combination_gen
+        combination = combination_gen.gen_comb_list(unique_values_list)
+        pivot = []
+        for i in combination:
+            temp = self.filter(lambda x: x[keys_to_pivot_list[0]] == i[0])
+            for j in range(1, len(keys_to_pivot_list)):
+                temp = temp.filter(lambda x: x[keys_to_pivot_list[j]] == i[j])
+            temp_list = []
+            for k in range(len(keys_to_aggregate_list)):
+                result = temp.aggregate(aggregate_func_list[k], keys_to_aggregate_list[k])
+                temp_list.append(result)
+            pivot.append([i, temp_list])
+        return pivot
+
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 
@@ -193,4 +215,10 @@ titanic_female_survived = titanic_female.filter(lambda x: x['survived'] == 'yes'
 all_female = len(titanic_female.table)
 remain_female = len(titanic_female_survived.table)
 print('The survival rate of female:',(remain_female/all_female)*100)
+print()
+table8 = Table('titanic', titanic)
+my_DB.insert(table8)
+my_table8 = my_DB.search('titanic')
+my_pivot = my_table8.pivot_table(['embarked', 'gender', 'class'], ['fare', 'fare', 'fare', 'last'], [lambda x: min(x), lambda x: max(x), lambda x: sum(x)/len(x), lambda x: len(x)])
+print(my_pivot)
 

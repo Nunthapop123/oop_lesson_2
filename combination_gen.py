@@ -17,6 +17,3 @@ def gen_comb_list(list_set):
     return start_list
 
 
-print(gen_comb_list([[1, 2, 3]]))
-print(gen_comb_list([[1, 2, 3], [4, 5]]))
-print(gen_comb_list([[1, 2, 3], [4, 5], [6, 7, 8]]))
